@@ -3,26 +3,31 @@ import logo from './image/airflow.svg';
 import Button from './components/Button';
 import Screen from './components/Screen';
 import ButtonClear from './components/ButtonClear';
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { evaluate } from 'mathjs';
+
+const MemoButton = memo(Button);
 
 function App() {
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState([]);
+  const [reset, setReset] = useState(false);
 
   const addInput = val => {
-    setInput(input + val);
+    input.push(val)
+    setInput([...input]);
   };
+
+  const addInputCached = useCallback(addInput, [reset]);
 
   const calculateResult = () => {
     if (input) {
-      setInput(evaluate(input));
+      setInput([evaluate(input.reduce((acc, x) => { acc += x; return acc; }, ''))]);
     } else {
       alert('Por favor ingrese valores para realizar los cálculos.');
     }
     
   };
-
 
   return (
     <div className="App">
@@ -35,33 +40,33 @@ function App() {
       </div> 
       
       <div className='container-calculator'>
-        <Screen input={input}/>
+        <Screen input={input.reduce((acc, x) => { acc += x; return acc; }, '')}/>
         <div className='row'>
-          <Button handleClick={addInput}>1</Button>
-          <Button handleClick={addInput}>2</Button>
-          <Button handleClick={addInput}>3</Button>
-          <Button handleClick={addInput}>+</Button>
+          <MemoButton handleClick={addInputCached}>1</MemoButton>
+          <MemoButton handleClick={addInputCached}>2</MemoButton>
+          <MemoButton handleClick={addInputCached}>3</MemoButton>
+          <MemoButton handleClick={addInputCached}>+</MemoButton>
         </div>
         <div className='row'>
-          <Button handleClick={addInput}>4</Button>
-          <Button handleClick={addInput}>5</Button>
-          <Button handleClick={addInput}>6</Button>
-          <Button handleClick={addInput}>-</Button>
+          <MemoButton handleClick={addInputCached}>4</MemoButton>
+          <MemoButton handleClick={addInputCached}>5</MemoButton>
+          <MemoButton handleClick={addInputCached}>6</MemoButton>
+          <MemoButton handleClick={addInputCached}>-</MemoButton>
         </div>           
         <div className='row'>
-          <Button handleClick={addInput}>7</Button>
-          <Button handleClick={addInput}>8</Button>
-          <Button handleClick={addInput}>9</Button>
-          <Button handleClick={addInput}>*</Button>
+          <MemoButton handleClick={addInputCached}>7</MemoButton>
+          <MemoButton handleClick={addInputCached}>8</MemoButton>
+          <MemoButton handleClick={addInputCached}>9</MemoButton>
+          <MemoButton handleClick={addInputCached}>*</MemoButton>
         </div>
         <div className='row'>
           <Button handleClick={calculateResult}>=</Button>
-          <Button handleClick={addInput}>0</Button>
-          <Button handleClick={addInput}>.</Button>
-          <Button handleClick={addInput}>/</Button>
+          <MemoButton handleClick={addInputCached}>0</MemoButton>
+          <MemoButton handleClick={addInputCached}>.</MemoButton>
+          <MemoButton handleClick={addInputCached}>/</MemoButton>
         </div>
         <div className='row'>
-          <ButtonClear handleClear={() => setInput('')}>
+          <ButtonClear handleClear={() => { setInput([]); setReset(!reset); }}>
             Clear
           </ButtonClear>
         </div>
